@@ -1,0 +1,79 @@
+#!/usr/bin/env bash
+# bootstrap <git-url> <project-name> <tmp-hash>
+
+### Environment setup
+
+set -o errexit    # always exit on error
+set -o pipefail   # don't ignore exit codes when piping output
+set -o nounset    # fail on unset variables
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )" # current direct of script
+
+source "$DIR/lib/output.sh"
+source "$DIR/lib/md5.sh"
+
+### Inputs
+
+GIT_URL=${1:-}
+BUILD_HASH=${2:-}
+
+### Start
+
+header "Bootstrapping build"
+
+BUILD_DIR="$DIR/../.build/$BUILD_HASH"
+
+### Determine immediate failures
+
+if [ -z "$BUILD_HASH" ]; then
+  error "Build hash was not provided"
+  exit 1
+fi
+
+if [ -d "$BUILD_DIR" ]; then
+  error "The build directory already exists, will not continue"
+  exit 1
+fi
+
+### See if the folder exists or not and create it if it does not
+
+header "Getting latest code"
+
+GIT_HASH=$(get_md5 "$GIT_URL")
+LOCAL_REPO_PATH="$DIR/../.repos/$GIT_HASH"
+
+info "GIT_URL: $GIT_URL"
+info "LOCAL_REPO_PATH: $LOCAL_REPO_PATH"
+info ""
+
+if [ ! -d "$LOCAL_REPO_PATH" ]; then
+  info "Cloning repository"
+  git clone "$GIT_URL" "$LOCAL_REPO_PATH" --quiet
+fi
+
+### Do all the necessary updates to the repo
+info "Updating repository"
+pushd "$LOCAL_REPO_PATH" > /dev/null
+  git fetch --all --quiet
+  git checkout --force origin/master --quiet
+  git submodule sync --quiet
+  git submodule update --init --recursive --quiet
+popd > /dev/null
+
+### Copy code over to the temporary build directory
+
+header "Copying code to build directory"
+info "BUILD_DIR: $BUILD_DIR"
+
+mkdir -p "$BUILD_DIR"
+rsync -a "$LOCAL_REPO_PATH/" "$BUILD_DIR" --exclude .git
+
+### Generating cache directory for project
+
+header "Generating cache directory"
+
+CACHE_DIR="$DIR/../.cache/$GIT_HASH"
+
+info "CACHE_DIR: $CACHE_DIR"
+
+mkdir -p "$CACHE_DIR"
