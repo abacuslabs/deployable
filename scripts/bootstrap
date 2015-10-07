@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# bootstrap <git-url> <project-name> <tmp-hash>
+# bootstrap <git-url> <tmp-hash>
 
 ### Environment setup
 
@@ -77,3 +77,14 @@ CACHE_DIR="$DIR/../.cache/$GIT_HASH"
 info "CACHE_DIR: $CACHE_DIR"
 
 mkdir -p "$CACHE_DIR"
+
+### Generating environment directory
+
+header "Generating environment directory"
+
+ENV_DIR="$DIR/../.envs/$BUILD_HASH"
+
+info "ENV_DIR: $ENV_DIR"
+
+mkdir -p "$ENV_DIR"
+

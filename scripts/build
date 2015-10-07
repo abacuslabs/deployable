@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# build <git-url> <tmp-hash> <buildpack>
+
+### Environment setup
+
+set -o errexit    # always exit on error
+set -o pipefail   # don't ignore exit codes when piping output
+set -o nounset    # fail on unset variables
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )" # current direct of script
+
+source "$DIR/lib/output.sh"
+source "$DIR/lib/md5.sh"
+
+### Inputs
+
+GIT_URL=${1:-}
+BUILD_HASH=${2:-}
+BUILD_PACK=${3:-}
+
+GIT_HASH=$(get_md5 "$GIT_URL")
+CACHE_DIR="$DIR/../.cache/$GIT_HASH"
+BUILD_DIR="$DIR/../.build/$BUILD_HASH"
+ENV_DIR="$DIR/../.envs/$BUILD_HASH"
+
+bash "$DIR/../buildpacks/$BUILD_PACK/bin/compile" "$BUILD_DIR" "$CACHE_DIR" "$ENV_DIR"
