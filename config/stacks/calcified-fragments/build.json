@@ -1,4 +1,0 @@
-{
-  "buildpack": "nodejs",
-  "git": "git@github.com:sjlu/calcified-fragments.git"
-}
