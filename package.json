@@ -1,0 +1,32 @@
+{
+  "name": "deploy",
+  "version": "0.0.0",
+  "license": "MIT",
+  "description": "A one-click build & deploy tool for your node applications",
+  "repository": "https://github.com/sjlu/deploy.git",
+  "scripts": {
+    "postinstall": "npm run build",
+    "build": "gulp",
+    "start": "node ./bin/www"
+  },
+  "dependencies": {
+    "body-parser": "~1.13.2",
+    "cookie-parser": "~1.3.5",
+    "debug": "~2.2.0",
+    "express": "~4.13.1",
+    "jade": "~1.11.0",
+    "lodash": "^3.10.1",
+    "morgan": "~1.6.1"
+  },
+  "devDependencies": {
+    "bower": "^1.5.3",
+    "gulp": "^3.9.0",
+    "gulp-concat": "^2.6.0",
+    "gulp-livereload": "^3.8.1",
+    "gulp-plumber": "^1.0.1",
+    "gulp-sourcemaps": "^1.6.0",
+    "gulp-stylus": "^2.1.0",
+    "gulp-watch": "^4.3.5",
+    "nib": "^1.1.0"
+  }
+}

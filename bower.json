@@ -1,0 +1,7 @@
+{
+  "name": "deploy",
+  "private": true,
+  "dependencies": {
+    "turret": "~3.1.2"
+  }
+}
