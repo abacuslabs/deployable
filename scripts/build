@@ -14,8 +14,8 @@ source "$DIR/lib/md5.sh"
 
 ### Inputs
 
-GIT_URL=${1:-}
-BUILD_HASH=${2:-}
+BUILD_HASH=${1:-}
+GIT_URL=${2:-}
 BUILD_PACK=${3:-}
 
 GIT_HASH=$(get_md5 "$GIT_URL")

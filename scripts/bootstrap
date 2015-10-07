@@ -14,8 +14,8 @@ source "$DIR/lib/md5.sh"
 
 ### Inputs
 
-GIT_URL=${1:-}
-BUILD_HASH=${2:-}
+BUILD_HASH=${1:-}
+GIT_URL=${2:-}
 
 ### Start
 
@@ -34,6 +34,17 @@ if [ -d "$BUILD_DIR" ]; then
   error "The build directory already exists, will not continue"
   exit 1
 fi
+
+### Logs
+
+header "Starting logs"
+
+LOG_DIR="$DIR/../.logs/"
+LOG_FILE="$DIR/../.logs/$BUILD_HASH"
+info "LOG_DIR: $LOG_DIR"
+
+mkdir -p "$LOG_DIR"
+touch "$LOG_FILE"
 
 ### See if the folder exists or not and create it if it does not
 

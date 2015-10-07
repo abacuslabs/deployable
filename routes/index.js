@@ -6,4 +6,6 @@ router.get('/', function(req, res, next) {
   res.render('index');
 });
 
+router.use('/stacks', require('./stacks'))
+
 module.exports = router;

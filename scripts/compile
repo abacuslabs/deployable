@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# compile <tmp-hash>
+
+### Environment setup
+
+set -o errexit    # always exit on error
+set -o pipefail   # don't ignore exit codes when piping output
+set -o nounset    # fail on unset variables
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )" # current direct of script
+
+source "$DIR/lib/output.sh"
+source "$DIR/lib/md5.sh"
+
+### Variables
+
+BUILD_HASH=${1:-}
+
+### Script
+
+header "Compressing"
+
+tar -czf "$DIR/../.build/$BUILD_HASH.tar.gz" --directory="$DIR/../.build/$BUILD_HASH" .
