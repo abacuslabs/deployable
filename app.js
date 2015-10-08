@@ -7,6 +7,7 @@ var config = require('./config');
 var passport = require('passport')
 var GitHubStrategy = require('passport-github').Strategy
 var session = require('express-session')
+var _ = require('lodash');
 
 var app = express();
 
@@ -40,7 +41,10 @@ passport.use(new GitHubStrategy({
   },
   function(accessToken, refreshToken, profile, done) {
     process.nextTick(function () {
-      return done(null, profile);
+      var user = _.pick(profile, ["id", "displayName", "username", "profileUrl"])
+      user.token = accessToken
+
+      return done(null, user);
     })
   }
 ));

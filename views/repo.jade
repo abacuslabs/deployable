@@ -1,0 +1,15 @@
+extends layout
+
+block content
+  br
+  div#repo.container
+    table(width="100%")
+      tbody
+        each commit in commits
+          tr
+            td.author
+              =commit.author.login
+            td.sha
+              =commit.short_sha
+            td
+              =commit.commit.message

@@ -16,10 +16,9 @@ bower_components
 npm-debug.log
 
 # Application specific directories
-.build
-.repos
+.tmp
 .cache
-.config/stacks
-
-# Environment variables
+.data
 .env
+public/build
+

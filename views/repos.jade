@@ -1,0 +1,17 @@
+extends layout
+
+block content
+  br
+  div.container#repos
+    form(method="POST")
+      div.row
+        div.ten.columns
+          input.u-full-width(type="text" placeholder="github/repo" name="url")
+        div.two.columns
+          input.u-full-width.button-primary(type="submit" value="Add")
+    div
+      each repo in repos
+        div.repo
+          a(href="/repos/"+repo.id)
+            =repo.full_name
+

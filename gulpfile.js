@@ -12,7 +12,8 @@ var fs = require('fs');
 
 var bowerjs = []
 var bowercss = [
-  "turret/dist/turret.min.css"
+  "skeleton/css/normalize.css",
+  "skeleton/css/skeleton.css"
 ]
 
 var prefix = function(b) {
