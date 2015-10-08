@@ -14,4 +14,5 @@ block content
             td
               =commit.commit.message
             td
-              =commit.sha
+              a(href="/repos/"+repo.id+"/build/"+commit.sha)
+                span.octicon.octicon-package

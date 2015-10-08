@@ -2,6 +2,7 @@
   "name": "deployable",
   "private": true,
   "dependencies": {
-    "skeleton": "skeleton-css#~2.0.4"
+    "skeleton": "skeleton-css#~2.0.4",
+    "octicons": "~3.1.0"
   }
 }

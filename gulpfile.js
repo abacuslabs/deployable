@@ -13,7 +13,14 @@ var fs = require('fs');
 var bowerjs = []
 var bowercss = [
   "skeleton/css/normalize.css",
-  "skeleton/css/skeleton.css"
+  "skeleton/css/skeleton.css",
+  "octicons/octicons/octicons.css"
+]
+var bowercopy = [
+  "octicons/octicons/octicons.eot",
+  "octicons/octicons/octicons.woff",
+  "octicons/octicons/octicons.ttf",
+  "octicons/octicons/octicons.svg"
 ]
 
 var prefix = function(b) {
@@ -22,6 +29,7 @@ var prefix = function(b) {
 
 bowerjs = _.map(bowerjs, prefix);
 bowercss = _.map(bowercss, prefix);
+bowercopy = _.map(bowercopy, prefix);
 
 gulp.task('stylus', function() {
   gulp
@@ -63,7 +71,25 @@ gulp.task('concat-css', function() {
 
 gulp.task('concat', ['concat-js', 'concat-css'])
 
-gulp.task('watch', ['concat', 'stylus'], function() {
+gulp.task('copy', function() {
+  _.each(bowercopy, function(f) {
+    var dest = 'public/build/';
+    var src = f;
+
+    if (fs.lstatSync(f).isDirectory()) {
+      dest += _.last(f.split('/'));
+      src += '/*';
+    }
+
+    gulp
+      .src(src)
+      .pipe(gulp.dest(dest))
+  });
+})
+
+gulp.task('bower', ['concat', 'copy'])
+
+gulp.task('watch', ['bower', 'stylus'], function() {
   livereload.listen({
     port: 30002
   });
@@ -87,4 +113,4 @@ gulp.task('watch', ['concat', 'stylus'], function() {
   });
 });
 
-gulp.task('default', ['concat', 'stylus']);
+gulp.task('default', ['bower', 'stylus']);
