@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# bootstrap <git-url> <tmp-hash>
+# bootstrap <repo-id> <build-id> <link> <git-sha>
 
 ### Environment setup
 
@@ -10,97 +10,67 @@ set -o nounset    # fail on unset variables
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )" # current direct of script
 
 source "$DIR/lib/output.sh"
-source "$DIR/lib/md5.sh"
-source "$DIR/lib/git.sh"
 
 ### Inputs
 
-BUILD_HASH=${1:-}
-GIT_URL=${2:-}
+REPO_ID=${1:-}
+BUILD_HASH=${2:-}
+DOWNLOAD_URL=${3:-}
+GIT_SHA=${4:-}
+
 
 ### Start
 
 header "Bootstrapping build"
-
 BUILD_DIR="$DIR/../.build/$BUILD_HASH"
 
 ### Determine immediate failures
 
+if [ -z "$REPO_ID" ]; then
+  error "REPO_ID was not provided"
+  exit 1
+fi
+
 if [ -z "$BUILD_HASH" ]; then
-  error "Build hash was not provided"
+  error "BUILD_HASH was not provided"
+  exit 1
+fi
+
+if [ -z "$DOWNLOAD_URL" ]; then
+  error "DOWNLOAD_URL was not provided"
   exit 1
 fi
 
 if [ -d "$BUILD_DIR" ]; then
-  error "The build directory already exists, will not continue"
+  error "BUILD_DIR already exists, will not continue"
   exit 1
 fi
 
-### Logs
+### Create log file
 
-header "Starting logs"
+header "Creating build directories"
 
-LOG_DIR="$DIR/../.logs/"
-LOG_FILE="$DIR/../.logs/$BUILD_HASH"
-info "LOG_DIR: $LOG_DIR"
-
+LOG_DIR="$DIR/../.build/"
+info "$LOG_DIR"
 mkdir -p "$LOG_DIR"
+
+LOG_FILE="$DIR/../.build/$BUILD_HASH.log"
+info "$LOG_FILE"
 touch "$LOG_FILE"
 
-### See if the folder exists or not and create it if it does not
-
-header "Getting latest code"
-
-GIT_HASH=$(get_md5 "$GIT_URL")
-LOCAL_REPO_PATH="$DIR/../.repos/$GIT_HASH"
-
-info "GIT_URL: $GIT_URL"
-info "LOCAL_REPO_PATH: $LOCAL_REPO_PATH"
-info ""
-
-if [ ! -d "$LOCAL_REPO_PATH" ]; then
-  info "Cloning repository"
-  git clone "$GIT_URL" "$LOCAL_REPO_PATH" --quiet
-fi
-
-### Do all the necessary updates to the repo
-info "Updating repository"
-pushd "$LOCAL_REPO_PATH" > /dev/null
-  git fetch --all --quiet
-  git checkout --force origin/master --quiet
-  git submodule sync --quiet
-  git submodule update --init --recursive --quiet
-popd > /dev/null
-
-### Copy code over to the temporary build directory
-
-header "Copying code to build directory"
-info "BUILD_DIR: $BUILD_DIR"
-
-mkdir -p "$BUILD_DIR"
-rsync -a "$LOCAL_REPO_PATH/" "$BUILD_DIR" --exclude .git
-
-GIT_VERSION=$(get_git_version "$LOCAL_REPO_PATH")
-info "GIT_VERSION: $GIT_VERSION"
-echo "$GIT_VERSION" > "$BUILD_DIR/.gitversion"
-
-### Generating cache directory for project
-
-header "Generating cache directory"
-
-CACHE_DIR="$DIR/../.cache/$GIT_HASH"
-
-info "CACHE_DIR: $CACHE_DIR"
-
+CACHE_DIR="$DIR/../.cache/$REPO_ID"
+info "$CACHE_DIR"
 mkdir -p "$CACHE_DIR"
 
-### Generating environment directory
+info "$BUILD_DIR"
+mkdir -p "$BUILD_DIR"
 
-header "Generating environment directory"
+### Download, extract, version
 
-ENV_DIR="$DIR/../.envs/$BUILD_HASH"
+header "Downloading code"
+info "$DOWNLOAD_URL"
+curl -s "$DOWNLOAD_URL" | tar -xz --strip=1 -C "$BUILD_DIR"
 
-info "ENV_DIR: $ENV_DIR"
-
-mkdir -p "$ENV_DIR"
-
+header "Writing SHA"
+info "$GIT_SHA"
+echo "$GIT_SHA" > "$BUILD_DIR/.gitsha"

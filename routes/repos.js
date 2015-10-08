@@ -3,6 +3,7 @@ var router = express.Router()
 var ds = require('../lib/datastore')
 var Promise = require('bluebird')
 var _ = require('lodash')
+var builder = require('../lib/builder')
 
 router.get('/:id', function(req, res, next) {
 
@@ -37,6 +38,38 @@ router.get('/:id', function(req, res, next) {
       repo: this.repo,
       commits: this.commits
     })
+  })
+  .catch(next)
+
+})
+
+router.get('/:id/build/:sha', function(req, res, next) {
+
+  ds.repos.findOneAsync({
+    id: parseInt(req.params.id)
+  })
+  .bind({})
+  .then(function(repo) {
+    this.repo = repo
+  })
+  .then(function() {
+    var url = this.repo.full_name.split("/")
+    var user = url[0]
+    var repo = url[1]
+
+    return req.github.repos.getArchiveLinkAsync({
+      user: user,
+      repo: repo,
+      ref: req.params.sha,
+      archive_format: 'tarball'
+    })
+  })
+  .then(function(link) {
+    link = link.meta.location
+    return builder.createBuild(this.repo.id, req.params.sha, link)
+  })
+  .then(function(build) {
+    res.redirect('/repos/' + req.params.id)
   })
   .catch(next)
 

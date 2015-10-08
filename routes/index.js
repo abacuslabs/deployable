@@ -72,6 +72,5 @@ router.post('/', function(req, res, next) {
 })
 
 router.use('/repos', require('./repos'))
-router.use('/stacks', require('./stacks'))
 
 module.exports = router;
