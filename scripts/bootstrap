@@ -18,11 +18,11 @@ BUILD_HASH=${2:-}
 DOWNLOAD_URL=${3:-}
 GIT_SHA=${4:-}
 
-
 ### Start
 
 header "Bootstrapping build"
-BUILD_DIR="$DIR/../.build/$BUILD_HASH"
+ROOT_BUILD_DIR="$DIR/../.tmp"
+BUILD_DIR="$ROOT_BUILD_DIR/$BUILD_HASH"
 
 ### Determine immediate failures
 
@@ -50,17 +50,20 @@ fi
 
 header "Creating build directories"
 
-LOG_DIR="$DIR/../.build/"
-info "$LOG_DIR"
-mkdir -p "$LOG_DIR"
+info "$ROOT_BUILD_DIR"
+mkdir -p "$ROOT_BUILD_DIR"
 
-LOG_FILE="$DIR/../.build/$BUILD_HASH.log"
+LOG_FILE="$ROOT_BUILD_DIR/$BUILD_HASH.log"
 info "$LOG_FILE"
 touch "$LOG_FILE"
 
-CACHE_DIR="$DIR/../.cache/$REPO_ID"
+CACHE_DIR="$ROOT_BUILD_DIR/.cache/$REPO_ID"
 info "$CACHE_DIR"
 mkdir -p "$CACHE_DIR"
+
+ENV_DIR="$ROOT_BUILD_DIR/.env/$REPO_ID"
+info "$ENV_DIR"
+mkdir -p "$ENV_DIR"
 
 info "$BUILD_DIR"
 mkdir -p "$BUILD_DIR"

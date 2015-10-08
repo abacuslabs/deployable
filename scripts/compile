@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# compile <tmp-hash>
+# compile <repo-id> <build-id>
 
 ### Environment setup
 
@@ -10,14 +10,16 @@ set -o nounset    # fail on unset variables
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )" # current direct of script
 
 source "$DIR/lib/output.sh"
-source "$DIR/lib/md5.sh"
+
+ROOT_BUILD_DIR="$DIR/../.tmp"
 
 ### Variables
 
-BUILD_HASH=${1:-}
+REPO_ID=${1:-}
+BUILD_ID=${1:-}
 
 ### Script
 
 header "Compressing"
 
-tar -czf "$DIR/../.build/$BUILD_HASH.tar.gz" --directory="$DIR/../.build/$BUILD_HASH" .
+tar -czf "$ROOT_BUILD_DIR/$BUILD_HASH.tar.gz" --directory="$ROOT_BUILD_DIR/$BUILD_HASH" .

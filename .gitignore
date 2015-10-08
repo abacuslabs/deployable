@@ -16,8 +16,7 @@ bower_components
 npm-debug.log
 
 # Build directories
-.build
-.cache
+.tmp
 
 # App data & environment
 .data

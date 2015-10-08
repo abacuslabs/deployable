@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# build <git-url> <tmp-hash> <buildpack>
+# build <repo-id> <build-id> <build-pack>
 
 ### Environment setup
 
@@ -10,17 +10,17 @@ set -o nounset    # fail on unset variables
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )" # current direct of script
 
 source "$DIR/lib/output.sh"
-source "$DIR/lib/md5.sh"
+
+ROOT_BUILD_DIR="$DIR/../.tmp"
 
 ### Inputs
 
-BUILD_HASH=${1:-}
-GIT_URL=${2:-}
+REPO_ID=${1:-}
+BUILD_ID=${2:-}
 BUILD_PACK=${3:-}
 
-GIT_HASH=$(get_md5 "$GIT_URL")
-CACHE_DIR="$DIR/../.cache/$GIT_HASH"
-BUILD_DIR="$DIR/../.build/$BUILD_HASH"
-ENV_DIR="$DIR/../.envs/$BUILD_HASH"
+CACHE_DIR="$ROOT_BUILD_DIR/.cache/$REPO_ID"
+BUILD_DIR="$ROOT_BUILD_DIR/$BUILD_ID"
+ENV_DIR="$ROOT_BUILD_DIR/.env/$REPO_ID"
 
 bash "$DIR/../buildpacks/$BUILD_PACK/bin/compile" "$BUILD_DIR" "$CACHE_DIR" "$ENV_DIR"
