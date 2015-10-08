@@ -20,3 +20,6 @@ npm-debug.log
 .repos
 .cache
 .config/stacks
+
+# Environment variables
+.env

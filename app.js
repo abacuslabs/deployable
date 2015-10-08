@@ -3,6 +3,10 @@ var path = require('path');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var config = require('./config');
+var passport = require('passport')
+var GitHubStrategy = require('passport-github').Strategy
+var session = require('express-session')
 
 var app = express();
 
@@ -14,7 +18,40 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
+app.use(session({
+  secret: config.SESSION_KEY,
+  resave: false,
+  saveUninitialized: false
+}))
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Github authentication required
+passport.serializeUser(function(user, done) {
+  done(null, user);
+});
+passport.deserializeUser(function(obj, done) {
+  done(null, obj);
+});
+passport.use(new GitHubStrategy({
+    clientID: config.GITHUB_CLIENT_ID,
+    clientSecret: config.GITHUB_CLIENT_SECRET,
+    callbackURL: config.URL + '/auth/github/callback',
+    scope: 'repo'
+  },
+  function(accessToken, refreshToken, profile, done) {
+    process.nextTick(function () {
+      return done(null, profile);
+    })
+  }
+));
+app.use(passport.initialize());
+app.use(passport.session());
+
+// auth routes
+app.get('/auth/github', passport.authenticate('github'))
+app.get('/auth/github/callback', passport.authenticate('github'), function(req, res) {
+  res.redirect('/')
+})
 
 // routes
 app.use('/', require('./routes/index'));
