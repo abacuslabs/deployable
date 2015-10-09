@@ -9,7 +9,10 @@ block content
         each commit in commits
           tr
             td.author
-              =commit.author.login
+              if (commit.committer)
+                =commit.committer.login
+              else
+                =commit.commit.author.name
             td.sha.text-unimportant
               =commit.short_sha
             td
