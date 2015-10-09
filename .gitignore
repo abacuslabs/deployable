@@ -22,4 +22,4 @@ npm-debug.log
 .data
 .env
 public/build
-config/repos.js*
+config/repos.json
