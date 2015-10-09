@@ -6,33 +6,42 @@ var _ = require('lodash')
 var builder = require('../lib/builder')
 var md5 = require('md5')
 var config = require('../config')
+var reposConfig = require('../config/repos');
+var definedRepos = _.keys(reposConfig)
 
 var createRepoFromGithub = function(user, repo) {
-  // lets see if the user has access
-  return req.github.repos.getAsync({
-    user: user,
-    repo: repo
-  })
-  .then(function(repo) {
-    if (!repo.permissions.admin) {
-      throw new Error("You don't have admin access to '" + url + "'")
-    }
-
-    return ds.repos.insertAsync({
-      id: repo.id,
-      full_name: repo.full_name
+  Promise.resolve()
+    .then(function() {
+      if (!_.contains(definedRepos, user + "/" + repo)) {
+        throw new Error("Repository not defined in config")
+      }
     })
-  })
+    .then(function() {
+      return req.github.repos.getAsync({
+        user: user,
+        repo: repo
+      })
+    })
+    .then(function(repo) {
+      if (!repo.permissions.admin) {
+        throw new Error("You don't have admin access to '" + url + "'")
+      }
+
+      return ds.repos.insertAsync({
+        id: repo.id,
+        full_name: repo.full_name
+      })
+    })
 }
 
 router.get('/create/:user/:repo', function(req, res, next) {
 
   var user = req.params.user
   var repoName = req.params.repo
+  var repoFullName = user + "/" + repoName
 
-  // make sure it doesn't exist first
-  ds.repos.findOneAsync({
-    full_name: user + "/" + repoName
+  return ds.repos.findOneAsync({
+    full_name: repoFullName
   })
   .then(function(repo) {
     if (!repo) {
@@ -59,7 +68,11 @@ router.use('/:id', function(req, res, next) {
   })
   .then(function(repo) {
     if (!repo) {
-      throw new Error("Repo not found")
+      throw new Error("Repository not found")
+    }
+
+    if (!_.contains(definedRepos, repo.full_name)) {
+      throw new Error("Repository disabled in config")
     }
 
     req.repo = repo
@@ -76,7 +89,7 @@ router.use('/:id', function(req, res, next) {
   })
   .then(function(githubRepo) {
     if (!githubRepo.permissions.admin) {
-      throw new Error("You do not have permission to view this repository")
+      throw new Error("You do not have permission to access this repository")
     }
 
     req.repo.token = req.user.token
