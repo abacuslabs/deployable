@@ -1,3 +1,18 @@
 extends layout
 
 block content
+  br
+  div.container#repos
+    if repos.length
+      div
+        each repo in repos
+          div.repo
+            if repo.enabled
+              if repo.id
+                a(href="/repos/"+repo.id)
+                  =repo.full_name
+              else
+                a(href="/repos/create/"+repo.full_name)
+            else
+              span.text-unimportant.text-italic=repo.full_name
+

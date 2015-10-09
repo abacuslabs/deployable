@@ -3,6 +3,8 @@ var router = express.Router();
 var Github = require('github')
 var Promise = require('bluebird')
 var ds = require('../lib/datastore');
+var reposConfig = require('../config/repos');
+var _ = require('lodash');
 
 router.use('/hooks', require('./hooks'))
 
@@ -37,42 +39,40 @@ router.use(function(req, res, next) {
 /* GET home page. */
 router.get('/', function(req, res, next) {
 
+  var definedRepos = _.keys(reposConfig)
+
   ds.repos.findAsync({})
     .then(function(repos) {
-      res.render('repos', {repos: repos})
+      var dbRepos = _.pluck(repos, "full_name")
+
+      // add in repo names that are not yet in
+      // the datastore
+      _.each(definedRepos, function(repo) {
+        if (!_.contains(dbRepos, repo)) {
+          repos.push({
+            full_name: repo
+          })
+        }
+      })
+
+      // mark each repo enabled true/false if its
+      // in the confg
+      _.each(repos, function(repo) {
+        repo.enabled = _.contains(definedRepos, repo.full_name)
+      })
+
+      // sort alphabetically
+      repos = repos.sort(function(a, b) {
+        return a.full_name.localeCompare(b.full_name)
+      })
+
+      res.render('index', {
+        repos: repos
+      })
     })
     .catch(next)
 
 });
-
-router.post('/', function(req, res, next) {
-
-  var url = req.body.url.split('/')
-  var user = url[0]
-  var repo = url[1]
-
-  // lets see if the user has access
-  req.github.repos.getAsync({
-    user: user,
-    repo: repo
-  })
-  .then(function(repo) {
-    if (!repo.permissions.admin) {
-      throw new Error("You don't have admin access to '" + url + "'")
-    }
-
-    return ds.repos.insertAsync({
-      id: repo.id,
-      full_name: repo.full_name,
-      token: req.user.token
-    })
-  })
-  .then(function(repo) {
-    res.redirect('/repos/' + repo.id + '/webhooks')
-  })
-  .catch(next)
-
-})
 
 router.use('/repos', require('./repos'))
 

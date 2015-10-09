@@ -7,6 +7,47 @@ var builder = require('../lib/builder')
 var md5 = require('md5')
 var config = require('../config')
 
+var createRepoFromGithub = function(user, repo) {
+  // lets see if the user has access
+  return req.github.repos.getAsync({
+    user: user,
+    repo: repo
+  })
+  .then(function(repo) {
+    if (!repo.permissions.admin) {
+      throw new Error("You don't have admin access to '" + url + "'")
+    }
+
+    return ds.repos.insertAsync({
+      id: repo.id,
+      full_name: repo.full_name
+    })
+  })
+}
+
+router.get('/create/:user/:repo', function(req, res, next) {
+
+  var user = req.params.user
+  var repoName = req.params.repo
+
+  // make sure it doesn't exist first
+  ds.repos.findOneAsync({
+    full_name: user + "/" + repoName
+  })
+  .then(function(repo) {
+    if (!repo) {
+      return createRepoFromGithub(user, repoName)
+    }
+
+    return repo
+  })
+  .then(function(repo) {
+    res.redirect('/repos/' + repo.id + '/webhooks')
+  })
+  .catch(next)
+
+})
+
 router.use('/:id', function(req, res, next) {
 
   // ensure that the logged in user
@@ -128,7 +169,7 @@ router.get('/:id/webhooks', function(req, res, next) {
   })
   .then(function(hooks) {
     return _.find(hooks, function(hook) {
-      return hook.url === hookUrl
+      return hook.config && hook.config.url === hookUrl
     })
   })
   .then(function(hook) {
