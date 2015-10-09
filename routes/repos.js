@@ -5,6 +5,16 @@ var Promise = require('bluebird')
 var _ = require('lodash')
 var builder = require('../lib/builder')
 
+router.use('/:id', function(req, res, next) {
+
+  // ensure that the logged in user
+  // has access to the github repository
+  // that they are trying to access
+
+  next()
+
+})
+
 router.get('/:id', function(req, res, next) {
 
   var repoId = req.params.id
@@ -25,11 +35,28 @@ router.get('/:id', function(req, res, next) {
       repo: repo,
       per_page: 30
     })
-
   })
   .then(function(commits) {
-    this.commits = _.map(commits, function(commit) {
+    this.commits = commits
+  })
+  .then(function() {
+    return ds.builds.findAsync({
+      sha: {
+        $in: _.pluck(this.commits, "sha")
+      }
+    })
+  })
+  .then(function(builds) {
+    this.builds = builds
+  })
+  .then(function() {
+    var groupedBuilds = _.groupBy(this.builds, function(build) {
+      return build.sha
+    })
+
+    this.commits = _.map(this.commits, function(commit) {
       commit.short_sha = commit.sha.substr(0, 6)
+      commit.builds = groupedBuilds[commit.sha] || []
       return commit
     })
   })
@@ -72,6 +99,24 @@ router.get('/:id/build/:sha', function(req, res, next) {
     res.redirect('/repos/' + req.params.id)
   })
   .catch(next)
+
+})
+
+router.get('/:id/logs/:build_id', function(req, res, next) {
+
+  builder.getLogs(req.params.build_id)
+    .then(function(log) {
+      res.render('log', {log: log})
+    })
+    .catch(next)
+
+})
+
+router.get('/:id/download/:build_id', function(req, res, next) {
+
+  res.set('Content-Type', 'application/x-gtar');
+  res.set('Content-Disposition', 'attachment; filename=' + req.params.build_id + '.tar.gz');
+  builder.downloadBuild(req.params.build_id).pipe(res)
 
 })
 

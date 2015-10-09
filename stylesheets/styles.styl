@@ -1,6 +1,33 @@
+pre
+  border: 1px solid #e1e1e1
+  border-radius: 4px
+  padding: 2.5rem 3rem
+  white-space: pre-wrap
+  font-size: 11px
+
+hr
+  margin-top: 0.75em
+  margin-bottom: 0.75em
+
+.text-unimportant
+  color: gray
+
 a
   .octicon
     color: #222
+
+table
+  td
+    vertical-align: top
+
+  &.no-separator
+    td
+      border-bottom: 0
+
+  &.no-vertical-padding
+    td
+      padding-top: 0
+      padding-bottom: 0
 
 #repos
   max-width: 640px
@@ -23,5 +50,7 @@ a
     text-align: right
 
   .sha
-    color: gray
     width: 5%
+
+  .action
+    width: 1%

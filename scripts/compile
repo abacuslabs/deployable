@@ -16,10 +16,10 @@ ROOT_BUILD_DIR="$DIR/../.tmp"
 ### Variables
 
 REPO_ID=${1:-}
-BUILD_ID=${1:-}
+BUILD_ID=${2:-}
 
 ### Script
 
 header "Compressing"
 
-tar -czf "$ROOT_BUILD_DIR/$BUILD_HASH.tar.gz" --directory="$ROOT_BUILD_DIR/$BUILD_HASH" .
+tar -czf "$ROOT_BUILD_DIR/$BUILD_ID.tar.gz" --directory="$ROOT_BUILD_DIR/$BUILD_ID" .

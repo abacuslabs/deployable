@@ -3,7 +3,8 @@ extends layout
 block content
   br
   div#repo.container
-    table(width="100%")
+    h3=repo.full_name
+    table.u-full-width
       tbody
         each commit in commits
           tr
@@ -13,6 +14,21 @@ block content
               =commit.short_sha
             td
               =commit.commit.message
+              if commit.builds.length
+                hr
+                table.u-full-width.no-separator.no-vertical-padding.border-top
+                  tbody
+                    each build in commit.builds
+                      tr
+                        td.text-unimportant
+                          =build._id
+                        td.action
+                          a(href="/repos/"+repo.id+"/logs/"+build._id)
+                            span.octicon.octicon-terminal
+                        td.action
+                          if build.download
+                            a(href="/repos/"+repo.id+"/download/"+build._id download)
+                              span.octicon.octicon-cloud-download
             td
               a(href="/repos/"+repo.id+"/build/"+commit.sha)
                 span.octicon.octicon-package
