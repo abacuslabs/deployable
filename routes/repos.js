@@ -72,7 +72,9 @@ router.get('/:id', function(req, res, next) {
       })
     })
     .then(function(builds) {
-      builds.reverse()
+      builds.sort(function(a, b) {
+        return (b.created_at || 0) - (a.created_at || 0);
+      })
       this.builds = builds
     })
     .then(function() {
