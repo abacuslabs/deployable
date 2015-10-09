@@ -68,7 +68,7 @@ router.post('/', function(req, res, next) {
     })
   })
   .then(function() {
-    res.redirect('/')
+    res.redirect('/repos/' + repo.id + '/webhooks')
   })
   .catch(next)
 

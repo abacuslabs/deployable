@@ -32,11 +32,28 @@ router.get('/create/:sha', function(req, res, next) {
 
 })
 
+router.use('/:build_id', function(req, res, next) {
+
+  ds.builds.findOneAsync({
+    _id: req.params.build_id
+  })
+  .then(function(build) {
+    req.build = build
+    next()
+  })
+  .catch(next)
+
+})
+
 router.get('/:build_id/log', function(req, res, next) {
 
   builder.getLogs(req.params.build_id)
     .then(function(log) {
-      res.render('log', {log: log})
+      res.render('log', {
+        log: log,
+        repo: req.repo,
+        build: req.build
+      })
     })
     .catch(next)
 

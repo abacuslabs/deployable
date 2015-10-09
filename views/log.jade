@@ -1,5 +1,8 @@
 extends layout
 
 block content
+  br
   div.container
+    h3.margin-none=repo.full_name
+    span.text-unimportant=build._id
     pre=log
