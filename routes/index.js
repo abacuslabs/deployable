@@ -4,6 +4,8 @@ var Github = require('github')
 var Promise = require('bluebird')
 var ds = require('../lib/datastore');
 
+router.use('/hooks', require('./hooks'))
+
 // All endpoints from here on out require
 // authentication with Github
 router.use(function(req, res, next) {
@@ -61,7 +63,8 @@ router.post('/', function(req, res, next) {
 
     return ds.repos.insertAsync({
       id: repo.id,
-      full_name: repo.full_name
+      full_name: repo.full_name,
+      token: req.user.token
     })
   })
   .then(function() {

@@ -37,6 +37,11 @@ router.use('/:id', function(req, res, next) {
     if (!githubRepo.permissions.admin) {
       throw new Error("You do not have permission to view this repository")
     }
+
+    req.repo.token = req.user.token
+    return ds.repos.updateAsync({
+      _id: req.repo._id
+    }, req.repo)
   })
   .then(function() {
     next()
@@ -72,7 +77,8 @@ router.get('/:id/webhooks', function(req, res, next) {
       repo: repo,
       name: "web",
       config: {
-        url: hookUrl
+        url: hookUrl,
+        content_type: 'json'
       }
     })
   })
