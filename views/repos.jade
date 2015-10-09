@@ -9,9 +9,10 @@ block content
           input.u-full-width(type="text" placeholder="github/repo" name="url")
         div.two.columns
           input.u-full-width.button-primary(type="submit" value="Add")
-    div
-      each repo in repos
-        div.repo
-          a(href="/repos/"+repo.id)
-            =repo.full_name
+    if repos.length
+      div
+        each repo in repos
+          div.repo
+            a(href="/repos/"+repo.id)
+              =repo.full_name
 

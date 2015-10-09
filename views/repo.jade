@@ -10,7 +10,7 @@ block content
           tr
             td.author
               =commit.author.login
-            td.sha
+            td.sha.text-unimportant
               =commit.short_sha
             td
               =commit.commit.message
@@ -23,12 +23,12 @@ block content
                         td.text-unimportant
                           =build._id
                         td.action
-                          a(href="/repos/"+repo.id+"/logs/"+build._id)
+                          a(href="/repos/"+repo.id+"/builds/"+build._id+"/log")
                             span.octicon.octicon-terminal
                         td.action
                           if build.download
-                            a(href="/repos/"+repo.id+"/download/"+build._id download)
+                            a(href="/repos/"+repo.id+"/builds/"+build._id+"/download" download)
                               span.octicon.octicon-cloud-download
             td
-              a(href="/repos/"+repo.id+"/build/"+commit.sha)
+              a(href="/repos/"+repo.id+"/builds/create/"+commit.sha)
                 span.octicon.octicon-package

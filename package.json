@@ -5,7 +5,8 @@
   "description": "A one-click build & deploy tool for your node applications",
   "repository": "https://github.com/sjlu/deployable.git",
   "scripts": {
-    "postinstall": "npm run build",
+    "postinstall": "npm run bower; npm run build",
+    "bower": "bower install --config.interactive=false",
     "build": "gulp",
     "start": "node ./bin/www"
   },
