@@ -11,7 +11,7 @@ var config = {
   URL: "http://127.0.0.1",
   GITHUB_CLIENT_ID: "",
   GITHUB_CLIENT_SECRET: "",
-  SESSION_KEY: "eimopvp9ny8AFSDnpy"
+  SESSION_KEY: ""
 };
 config = _.defaults(process.env, config);
 
