@@ -14,16 +14,11 @@ Deployable has a couple of opinions about deploys:
 ## Setup
 
 * You'll need to create a [GitHub application key](https://github.com/settings/developers). Once you
-have this, you will then need to create a `.env` file on the root directory of the project.
-
-```
-URL=https://deployable.ngrok.com
-GITHUB_CLIENT_KEY=
-GITHUB_CLIENT_SECRET=
-```
+have this, you will then need to create a `.env` file on the root directory of the project. See 
+[.env.example](.env.example).
 
 * Afterwards, you'll need to setup your repositories and deployment environments in
-`config/repos.json`. See `config/repos.example.json` for possible options.
+`config/repos.json`. See [config/repos.json.example](config/repos.json.example) for possible options.
 
 * Then, make sure you have [Node.js](https://nodejs.org/en/) installed on your machine. Afterwards,
 you can run `npm install` which install all dependencies and build the application.
