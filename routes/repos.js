@@ -4,6 +4,8 @@ var ds = require('../lib/datastore')
 var Promise = require('bluebird')
 var _ = require('lodash')
 var builder = require('../lib/builder')
+var md5 = require('md5')
+var config = require('../config')
 
 router.use('/:id', function(req, res, next) {
 
@@ -38,6 +40,44 @@ router.use('/:id', function(req, res, next) {
   })
   .then(function() {
     next()
+  })
+  .catch(next)
+
+})
+
+router.get('/:id/webhooks', function(req, res, next) {
+
+  var url = req.repo.full_name.split("/")
+  var user = url[0]
+  var repo = url[1]
+
+  var hookUrl = config.URL + "/hooks/github/" + req.repo.id
+
+  req.github.repos.getHooksAsync({
+    user: user,
+    repo: repo
+  })
+  .then(function(hooks) {
+    return _.find(hooks, function(hook) {
+      return hook.url === hookUrl
+    })
+  })
+  .then(function(hook) {
+    if (hook) {
+      return
+    }
+
+    return req.github.repos.createHookAsync({
+      user: user,
+      repo: repo,
+      name: "web",
+      config: {
+        url: hookUrl
+      }
+    })
+  })
+  .then(function(hook) {
+    res.redirect('/repos/' + req.repo.id)
   })
   .catch(next)
 
