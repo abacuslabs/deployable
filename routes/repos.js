@@ -96,6 +96,14 @@ router.get('/:id', function(req, res, next) {
       })
     })
     .then(function() {
+      return ds.deploys.findAsync({
+        repo_id: this.repo.id
+      })
+    })
+    .then(function(deploys) {
+
+    })
+    .then(function() {
       res.render('repo', {
         repo: this.repo,
         commits: this.commits
@@ -146,5 +154,6 @@ router.get('/:id/webhooks', function(req, res, next) {
 })
 
 router.use('/:id/builds', require('./builds'))
+router.use('/:id/deploys', require('./deploys'))
 
 module.exports = router
