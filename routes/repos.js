@@ -8,18 +8,20 @@ var md5 = require('md5')
 var config = require('../config')
 var reposConfig = require('../config/repos');
 var definedRepos = _.keys(reposConfig)
+var deployer = require('../lib/deployer');
+var signoffLib = require('../lib/signoff');
 
-var createRepoFromGithub = function(user, repo) {
+var createRepoFromGithub = function(user, name) {
   Promise.resolve()
     .then(function() {
-      if (!_.contains(definedRepos, user + "/" + repo)) {
+      if (!_.contains(definedRepos, user + "/" + name)) {
         throw new Error("Repository not defined in config")
       }
     })
     .then(function() {
       return req.github.repos.getAsync({
         user: user,
-        repo: repo
+        repo: name
       })
     })
     .then(function(repo) {
@@ -37,15 +39,15 @@ var createRepoFromGithub = function(user, repo) {
 router.get('/create/:user/:repo', function(req, res, next) {
 
   var user = req.params.user
-  var repoName = req.params.repo
-  var repoFullName = user + "/" + repoName
+  var name = req.params.repo
+  var fullName = user + "/" + name
 
   return ds.repos.findOneAsync({
-    full_name: repoFullName
+    full_name: fullName
   })
   .then(function(repo) {
     if (!repo) {
-      return createRepoFromGithub(user, repoName)
+      return createRepoFromGithub(user, name)
     }
 
     return repo
@@ -78,13 +80,16 @@ router.use('/:id', function(req, res, next) {
     req.repo = repo
   })
   .then(function() {
-    var url = req.repo.full_name.split("/")
-    var user = url[0]
-    var repo = url[1]
+
+    if (!req.repo.user || !req.repo.name) {
+      var url = req.repo.full_name.split("/")
+      req.repo.user = url[0]
+      req.repo.name = url[1]
+    }
 
     return req.github.repos.getAsync({
-      user: user,
-      repo: repo
+      user: req.repo.user,
+      repo: req.repo.name
     })
   })
   .then(function(githubRepo) {
@@ -104,63 +109,101 @@ router.use('/:id', function(req, res, next) {
 
 })
 
+var getBuildsForCommits = function(repoId, commits) {
+  return ds.builds.findAsync({
+    repo_id: repoId,
+    sha: {
+      $in: _.pluck(commits, "sha")
+    }
+  })
+  .then(function(builds) {
+    builds.sort(function(a, b) {
+      return (b.created_at || 0) - (a.created_at || 0);
+    })
+    return builds
+  })
+}
+
+var getSignoffs = function(repoId, stagingDeploy, productionDeploy) {
+
+  if (!stagingDeploy || !productionDeploy) {
+    return [null, null, (stagingDeploy)]
+  }
+
+  return Promise
+    .resolve()
+    .bind({})
+    .then(function() {
+      return deployer.commitRange(repoId, stagingDeploy.sha, productionDeploy.sha)
+    })
+    .then(function(commits) {
+      return signoffLib.getSignoffInfo(repoId, commits)
+    })
+
+}
+
 router.get('/:id', function(req, res, next) {
 
   Promise
     .resolve(req.repo)
     .bind({})
+    // repo commits
     .then(function(repo) {
       this.repo = repo
 
-      var url = this.repo.full_name.split("/")
-      var user = url[0]
-      var repo = url[1]
-
       return req.github.repos.getCommitsAsync({
-        user: user,
-        repo: repo,
-        per_page: 30
+        user: repo.user,
+        repo: repo.name,
+        per_page: 100
       })
     })
     .then(function(commits) {
       this.commits = commits
     })
+    // builds, deploys, and signoffs
     .then(function() {
-      return ds.builds.findAsync({
-        sha: {
-          $in: _.pluck(this.commits, "sha")
-        }
-      })
+      return Promise.all([
+        getBuildsForCommits(this.repo.id, this.commits),
+        deployer.lastDeploys(this.repo.id)
+      ])
     })
-    .then(function(builds) {
-      builds.sort(function(a, b) {
-        return (b.created_at || 0) - (a.created_at || 0);
-      })
+    .spread(function(builds, lastDeploys) {
       this.builds = builds
+      this.lastDeploys = lastDeploys
+    })
+    // signoffs
+    .then(function() {
+      return getSignoffs(this.repo.id, this.lastDeploys.staging, this.lastDeploys.production)
+    })
+    .spread(function(signoffShaMap, signoffUserMap, canDeployProd) {
+      this.signoffShaMap = signoffShaMap || {}
+      this.signoffUserMap = signoffUserMap || {}
+      this.canDeployProd = canDeployProd
     })
     .then(function() {
       var groupedBuilds = _.groupBy(this.builds, function(build) {
         return build.sha
       })
 
+      var lastDeploys = this.lastDeploys
+      var signoffShaMap = this.signoffShaMap
+
       this.commits = _.map(this.commits, function(commit) {
         commit.short_sha = commit.sha.substr(0, 6)
         commit.builds = groupedBuilds[commit.sha] || []
+        commit.on_staging = (lastDeploys.staging && lastDeploys.staging.sha === commit.sha)
+        commit.on_production = (lastDeploys.production && lastDeploys.production.sha === commit.sha)
+        commit.signoff = signoffShaMap[commit.sha]
         return commit
       })
     })
     .then(function() {
-      return ds.deploys.findAsync({
-        repo_id: this.repo.id
-      })
-    })
-    .then(function(deploys) {
-
-    })
-    .then(function() {
       res.render('repo', {
         repo: this.repo,
-        commits: this.commits
+        commits: this.commits,
+        lastDeploys: this.lastDeploys,
+        canDeployProd: this.canDeployProd,
+        needUserSignoff: this.signoffUserMap[req.user.username] || false
       })
     })
     .catch(next)
@@ -169,15 +212,11 @@ router.get('/:id', function(req, res, next) {
 
 router.get('/:id/webhooks', function(req, res, next) {
 
-  var url = req.repo.full_name.split("/")
-  var user = url[0]
-  var repo = url[1]
-
   var hookUrl = config.URL + "/hooks/github/" + req.repo.id
 
   req.github.repos.getHooksAsync({
-    user: user,
-    repo: repo,
+    user: req.repo.user,
+    repo: req.repo.name,
     per_page: 30
   })
   .then(function(hooks) {
@@ -191,8 +230,8 @@ router.get('/:id/webhooks', function(req, res, next) {
     }
 
     return req.github.repos.createHookAsync({
-      user: user,
-      repo: repo,
+      user: req.repo.user,
+      repo: req.repo.name,
       name: "web",
       config: {
         url: hookUrl,

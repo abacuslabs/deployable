@@ -3,6 +3,6 @@ extends layout
 block content
   br
   div.container
-    h3.margin-none=repo.full_name
-    span.text-unimportant=build._id
+    h3.text-center.margin-none=repo.full_name
+    div.monospace.text-center.text-unimportant=build._id
     pre=log

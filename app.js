@@ -54,7 +54,7 @@ app.use(passport.session());
 // auth routes
 app.get('/auth/github', passport.authenticate('github'))
 app.get('/auth/github/callback', passport.authenticate('github'), function(req, res) {
-  res.redirect('/')
+  res.redirect(req.session.returnTo || "/")
 })
 
 // routes

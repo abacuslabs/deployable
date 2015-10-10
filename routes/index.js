@@ -12,6 +12,7 @@ router.use('/hooks', require('./hooks'))
 // authentication with Github
 router.use(function(req, res, next) {
   if (!req.isAuthenticated()) {
+    req.session.returnTo = req.path
     return res.redirect('/auth/github')
   }
   next()

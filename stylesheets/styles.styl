@@ -1,3 +1,6 @@
+body
+  line-height: 1.6em
+
 pre
   border: 1px solid #e1e1e1
   border-radius: 4px
@@ -6,7 +9,7 @@ pre
   font-size: 11px
 
 hr
-  margin-top: 0.75em
+  margin-top: 0.85em
   margin-bottom: 0.75em
 
 .text-unimportant
@@ -14,6 +17,23 @@ hr
 
 .text-italic
   font-style: italic
+
+.margin-bottom-none
+  margin-bottom: 0
+
+.margin-top-none
+  margin-top: 0
+
+.text-center
+  text-align: center
+
+.button
+  &[disabled]
+    background-color: #eee
+    &:hover
+      background-color: #eee
+      border-color: #bbb
+
 
 a
   .octicon
@@ -24,17 +44,24 @@ h1, h2, h3, h4, h5
     margin-bottom: 0
 
 table
-  td
-    vertical-align: top
+tr
+td
+  &.cell-border-none
+    border-bottom: 0
 
-  &.no-separator
     td
       border-bottom: 0
 
-  &.no-vertical-padding
+  &.cell-padding-none
+    padding-top: 0
+    padding-bottom: 0
+
     td
       padding-top: 0
       padding-bottom: 0
+
+.monospace
+  font-family: monospace
 
 #repos
   max-width: 640px
@@ -51,7 +78,8 @@ table
         border-bottom: 0
 
 #repo
-  max-width: 720px
+  td
+    vertical-align: top
 
   .author
     text-align: right
@@ -64,3 +92,24 @@ table
     padding-left: 0
     padding-right: 0
     text-align: right
+
+  .status
+    font-weight: bold
+    font-size: 10px
+    text-align: center
+
+#environments
+  td:first-child
+  td:last-child
+    width: 45%
+
+  .environment
+    height: 100%
+    text-align: center
+    border: 1px solid #e1e1e1
+    border-radius: 4px
+    padding: 2.5rem 3rem
+
+    .heading
+      font-weight: bold
+

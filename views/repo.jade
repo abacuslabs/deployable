@@ -2,28 +2,76 @@ extends layout
 
 block content
   br
-  div#repo.container
-    h3=repo.full_name
-    table.u-full-width
+  div.container(style="max-width:820px")
+    h3.text-center=repo.full_name
+
+    table#environments.cell-border-none.u-full-width
+      tbody
+        tr
+          td
+            div.environment
+              div.heading
+                | STAGING
+              div.monospace
+                if lastDeploys.staging
+                  =lastDeploys.staging.sha
+                else
+                  | none
+              br
+              a.button.margin-bottom-none
+                | Deploy
+          td.text-center
+            span.mega-octicon.octicon-rocket
+          td
+            div.environment
+              div.heading
+                | PRODUCTION
+              div.monospace
+                if (lastDeploys.production)
+                  =lastDeploys.production.sha
+                else
+                  | none
+              br
+              if needUserSignoff
+                a.button.margin-bottom-none
+                  | I'm Good
+              else if canDeployProd
+                a.button.button-primary.margin-bottom-none
+                  | Deploy
+              else
+                button.button.button-disabled.margin-bottom-none(disabled="disabled")
+                  | Waiting for signoff
+
+
+    table#repo.u-full-width
       tbody
         each commit in commits
           tr
             td.author
-              if (commit.committer)
-                =commit.committer.login
+              if (commit.author)
+                =commit.author.login
               else
-                =commit.commit.author.name
-            td.sha.text-unimportant
+                span.text-unimportant=commit.commit.author.name
+            td.sha.text-unimportant.monospace
               =commit.short_sha
+            td.signoff
+              if commit.signoff !== undefined
+                if commit.signoff
+                  span.octicon.octicon-check
+            td.status
+              if commit.on_production
+                | PROD
+              else if commit.on_staging
+                | STAGING
             td
               =commit.commit.message
               if commit.builds.length
                 hr
-                table.u-full-width.no-separator.no-vertical-padding.border-top
+                table.u-full-width.cell-border-none.cell-padding-none.margin-bottom-none
                   tbody
                     each build in commit.builds
                       tr
-                        td.text-unimportant
+                        td.text-unimportant.monospace
                           =build._id
                         td.action
                           a(href="/repos/"+repo.id+"/builds/"+build._id+"/log")
