@@ -10,6 +10,7 @@ var reposConfig = require('../config/repos');
 var definedRepos = _.keys(reposConfig)
 var deployer = require('../lib/deployer');
 var signoffLib = require('../lib/signoff');
+var repoLib = require('../lib/repo');
 
 var createRepoFromGithub = function(user, name) {
   Promise.resolve()
@@ -109,21 +110,6 @@ router.use('/:id', function(req, res, next) {
 
 })
 
-var getBuildsForCommits = function(repoId, commits) {
-  return ds.builds.findAsync({
-    repo_id: repoId,
-    sha: {
-      $in: _.pluck(commits, "sha")
-    }
-  })
-  .then(function(builds) {
-    builds.sort(function(a, b) {
-      return (b.created_at || 0) - (a.created_at || 0);
-    })
-    return builds
-  })
-}
-
 var getSignoffs = function(repoId, stagingDeploy, productionDeploy) {
 
   if (!stagingDeploy || !productionDeploy) {
@@ -134,7 +120,7 @@ var getSignoffs = function(repoId, stagingDeploy, productionDeploy) {
     .resolve()
     .bind({})
     .then(function() {
-      return deployer.commitRange(repoId, stagingDeploy.sha, productionDeploy.sha)
+      return repoLib.commitRange(repoId, stagingDeploy.sha, productionDeploy.sha)
     })
     .then(function(commits) {
       return signoffLib.getSignoffInfo(repoId, commits)
@@ -163,7 +149,7 @@ router.get('/:id', function(req, res, next) {
     // builds, deploys, and signoffs
     .then(function() {
       return Promise.all([
-        getBuildsForCommits(this.repo.id, this.commits),
+        builder.getBuildsForCommits(this.repo.id, this.commits),
         deployer.lastDeploys(this.repo.id)
       ])
     })
