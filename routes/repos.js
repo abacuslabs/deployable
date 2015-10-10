@@ -196,6 +196,35 @@ router.get('/:id', function(req, res, next) {
 
 })
 
+router.get('/:id/signoff', function(req, res, next) {
+
+  return Promise
+    .resolve()
+    .then(function() {
+      return deployer.lastDeploys(req.repo.id)
+    })
+    .then(function(lastDeploys) {
+      if (!lastDeploys.stagingDeploy || !lastDeploys.productionDeploy) {
+        return []
+      }
+
+      return repoLib.commitRange(repoId, stagingDeploy.sha, productionDeploy.sha)
+    })
+    .each(function(commit) {
+      if (commit.author && commit.author.login === req.user.username) {
+        return ds.signoffs.insertAsync({
+          repo_id: req.repo.id,
+          sha: commit.sha
+        })
+      }
+    })
+    .then(function() {
+      res.redirect('/repos/'+req.repo.id)
+    })
+    .catch(next)
+
+})
+
 router.get('/:id/webhooks', function(req, res, next) {
 
   var hookUrl = config.URL + "/hooks/github/" + req.repo.id
