@@ -14,12 +14,19 @@ block content
                 | STAGING
               div.monospace
                 if lastDeploys.staging
-                  =lastDeploys.staging.sha
+                  if lastDeploys.staging.error
+                    span.error=lastDeploys.staging.sha
+                  else
+                    =lastDeploys.staging.sha
                 else
                   | null
               br
-              a.button.margin-bottom-none(href="/repos/"+repo.id+"/deploys/staging/start")
-                | Deploy
+              if lastDeploys.staging && !lastDeploys.staging.finished && !lastDeploys.staging.error
+                button.button.button-disabled.margin-bottom-none(disabled="disabled")
+                  | Deploying
+              else
+                a.button.margin-bottom-none(href="/repos/"+repo.id+"/deploys/staging/start")
+                  | Deploy
           td.text-center
             span.mega-octicon.octicon-rocket
           td
@@ -27,14 +34,20 @@ block content
               div.heading
                 | PRODUCTION
               div.monospace
-                if (lastDeploys.production)
-                  =lastDeploys.production.sha
+                if lastDeploys.production
+                  if lastDeploys.production.error
+                    span.error=lastDeploys.production.sha
+                  else
+                    =lastDeploys.production.sha
                 else
                   | null
               br
               if needsUserSignoff
                 a.button.margin-bottom-none(href="/repos/"+repo.id+"/signoff")
                   | I'm Good
+              else if lastDeploys.production && !lastDeploys.production.finished && !lastDeploys.production.error
+                button.button.button-disabled.margin-bottom-none(disabled="disabled")
+                  | Deploying
               else if canDeployProd
                 a.button.button-primary.margin-bottom-none(href="/repos/"+repo.id+"/deploys/production/start")
                   | Deploy
@@ -72,12 +85,15 @@ block content
                     each build in commit.builds
                       tr
                         td.text-unimportant.monospace
-                          =build._id
+                          if build.error
+                            span.error=build._id
+                          else
+                            =build._id
                         td.action
                           a(href="/repos/"+repo.id+"/builds/"+build._id+"/log")
                             span.octicon.octicon-terminal
                         td.action
-                          if build.download
+                          if build.finished
                             a(href="/repos/"+repo.id+"/builds/"+build._id+"/download" download)
                               span.octicon.octicon-cloud-download
             td

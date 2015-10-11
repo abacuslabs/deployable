@@ -7,6 +7,7 @@
 var app = require('../app');
 var debug = require('debug')('deploy:server');
 var http = require('http');
+var ds = require('../lib/datastore');
 
 /**
  * Get port from environment and store in Express.
@@ -20,14 +21,41 @@ app.set('port', port);
  */
 
 var server = http.createServer(app);
+server.on('error', onError);
+server.on('listening', onListening);
+
+/**
+ * Cleanup builds and deploys that have not finished.
+ */
+
+ds.builds.findAsync({
+  $where: function() {
+    return this.finished == undefined && this.error == undefined
+  }
+})
+.each(function(build) {
+  build.error = true
+  return ds.builds.updateAsync({
+    _id: build._id
+  }, build)
+})
+
+ds.deploys.findAsync({
+  $where: function() {
+    return this.finished == undefined && this.error == undefined
+  }
+})
+.each(function(deploy) {
+  deploy.error = true
+  return ds.deploys.updateAsync({
+    _id: deploy._id
+  }, deploy)
+})
 
 /**
  * Listen on provided port, on all network interfaces.
  */
-
 server.listen(port);
-server.on('error', onError);
-server.on('listening', onListening);
 
 /**
  * Normalize a port into a number, string, or false.
