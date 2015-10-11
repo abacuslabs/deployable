@@ -182,6 +182,12 @@ router.get('/:id', function(req, res, next) {
         commit.signoff = signoffShaMap[commit.sha]
         return commit
       })
+
+      var needsUserSignoff = _.chain(this.signoffUserMap).keys().contains(req.user.username).value()
+      if (needsUserSignoff) {
+        needsUserSignoff = !this.signoffUserMap[req.user.username]
+      }
+      this.needsUserSignoff = needsUserSignoff
     })
     .then(function() {
       res.render('repo', {
@@ -189,7 +195,7 @@ router.get('/:id', function(req, res, next) {
         commits: this.commits,
         lastDeploys: this.lastDeploys,
         canDeployProd: this.canDeployProd,
-        needUserSignoff: this.signoffUserMap[req.user.username] || false
+        needsUserSignoff: this.needsUserSignoff
       })
     })
     .catch(next)
@@ -204,11 +210,11 @@ router.get('/:id/signoff', function(req, res, next) {
       return deployer.lastDeploys(req.repo.id)
     })
     .then(function(lastDeploys) {
-      if (!lastDeploys.stagingDeploy || !lastDeploys.productionDeploy) {
+      if (!lastDeploys.staging || !lastDeploys.production) {
         return []
       }
 
-      return repoLib.commitRange(repoId, stagingDeploy.sha, productionDeploy.sha)
+      return repoLib.commitRange(req.repo.id, lastDeploys.staging.sha, lastDeploys.production.sha)
     })
     .each(function(commit) {
       if (commit.author && commit.author.login === req.user.username) {

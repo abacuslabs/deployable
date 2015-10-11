@@ -32,8 +32,8 @@ block content
                 else
                   | null
               br
-              if needUserSignoff
-                a.button.margin-bottom-none(href="/repos/"+repo.id+"/signoffs")
+              if needsUserSignoff
+                a.button.margin-bottom-none(href="/repos/"+repo.id+"/signoff")
                   | I'm Good
               else if canDeployProd
                 a.button.button-primary.margin-bottom-none(href="/repos/"+repo.id+"/deploys/production/start")
