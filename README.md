@@ -13,9 +13,10 @@ Deployable has a couple of opinions about deploys:
 
 ## Setup
 
-* You'll need to create a [GitHub application key](https://github.com/settings/developers). Once you
-have this, you will then need to create a `.env` file on the root directory of the project. See 
-[.env.example](.env.example).
+* You'll need to create a [GitHub application key](https://github.com/settings/developers). Once you have this, you will then need to create a `.env` file on the root directory of the project.
+See [.env.example](.env.example).
+
+* You'll need to create an SSH key with `ssh-keygen` for the user that is running Deployable. The public key will need to be put on each server that you wish to deploy to.
 
 * Afterwards, you'll need to setup your repositories and deployment environments in
 `config/repos.json`. See [config/repos.json.example](config/repos.json.example) for possible options.
