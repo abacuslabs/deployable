@@ -53,7 +53,7 @@ header "Creating build directories"
 info "$ROOT_BUILD_DIR"
 mkdir -p "$ROOT_BUILD_DIR"
 
-LOG_FILE="$ROOT_BUILD_DIR/$BUILD_HASH.log"
+LOG_FILE="$ROOT_BUILD_DIR/build-$BUILD_HASH.log"
 info "$LOG_FILE"
 touch "$LOG_FILE"
 
