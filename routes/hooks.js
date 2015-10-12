@@ -11,6 +11,8 @@ router.post('/github/:repo_id', function(req, res, next) {
 
   repoLib.getRepoAndGithub(req.params.repo_id)
     .spread(function(repo, github) {
+      this.repo = repo
+
       return github.repos.getArchiveLinkAsync({
         user: repo.user,
         repo: repo.name,
