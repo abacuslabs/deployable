@@ -12,15 +12,15 @@ var deployer = require('../lib/deployer');
 var signoffLib = require('../lib/signoff');
 var repoLib = require('../lib/repo');
 
-var createRepoFromGithub = function(user, name) {
-  Promise.resolve()
+var createRepoFromGithub = function(github, user, name) {
+  return Promise.resolve()
     .then(function() {
       if (!_.contains(definedRepos, user + "/" + name)) {
         throw new Error("Repository not defined in config")
       }
     })
     .then(function() {
-      return req.github.repos.getAsync({
+      return github.repos.getAsync({
         user: user,
         repo: name
       })
@@ -48,7 +48,7 @@ router.get('/create/:user/:repo', function(req, res, next) {
   })
   .then(function(repo) {
     if (!repo) {
-      return createRepoFromGithub(user, name)
+      return createRepoFromGithub(req.github, user, name)
     }
 
     return repo
