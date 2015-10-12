@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+# deploy <build-id> <host-string>
+
+### Environment setup
+
+set -o errexit    # always exit on error
+set -o pipefail   # don't ignore exit codes when piping output
+set -o nounset    # fail on unset variables
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )" # current direct of script
+
+source "$DIR/lib/output.sh"
+
+ROOT_BUILD_DIR="$DIR/../.tmp"
+
+### Inputs
+
+BUILD_ID=${1:-}
+HOST=${2:-}
+
+### Upload
+
+scp "$ROOT_BUILD_DIR/$BUILD_ID.tar.gz" "$HOST:"
+
+### Extract
+
+ssh "$HOST" "mkdir $BUILD_ID; tar -C $BUILD_ID -xf $BUILD_ID.tar.gz; rm $BUILD_ID.tar.gz"
+
+### Deploy
+
+PROFILED_LINE="for script in \$HOME/.profile.d/*; do if [ -r "\\\$script" ]; then . "\\\$script"; fi done"
+
+ssh "$HOST" /bin/bash << EOF
+
+  ln -sfn "$BUILD_ID" latest
+  ln -sfn latest/.heroku .
+  ln -sfn latest/.profile.d .
+  grep -q "$PROFILED_LINE" ".bashrc" || echo "$PROFILED_LINE" >> ".bashrc"
+
+EOF
