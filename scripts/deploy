@@ -20,17 +20,17 @@ HOST=${2:-}
 
 ### Upload
 
-scp "$ROOT_BUILD_DIR/$BUILD_ID.tar.gz" "$HOST:"
+scp -o StrictHostKeyChecking=no "$ROOT_BUILD_DIR/$BUILD_ID.tar.gz" "$HOST:"
 
 ### Extract
 
-ssh "$HOST" "mkdir $BUILD_ID; tar -C $BUILD_ID -xf $BUILD_ID.tar.gz; rm $BUILD_ID.tar.gz"
+ssh -o StrictHostKeyChecking=no "$HOST" "mkdir $BUILD_ID; tar -C $BUILD_ID -xf $BUILD_ID.tar.gz; rm $BUILD_ID.tar.gz"
 
 ### Deploy
 
 PROFILED_LINE="for script in \$HOME/.profile.d/*; do if [ -r "\\\$script" ]; then . "\\\$script"; fi done"
 
-ssh "$HOST" /bin/bash << EOF
+ssh -o StrictHostKeyChecking=no "$HOST" /bin/bash << EOF
 
   ln -sfn "$BUILD_ID" latest
   ln -sfn latest/.heroku .
