@@ -1,0 +1,7 @@
+{
+  "apps": [{
+    "name": "www",
+    "script": "bin/www",
+    "post_update": ["npm install"]
+  }]
+}
