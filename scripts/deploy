@@ -38,3 +38,7 @@ ssh -o StrictHostKeyChecking=no "$HOST" /bin/bash << EOF
   grep -q "$PROFILED_LINE" ".bashrc" || echo "$PROFILED_LINE" >> ".bashrc"
 
 EOF
+
+### Execution
+
+ssh -o StrictHostKeyChecking=no "$HOST" "if [ -a latest/deploy.sh ]; then cd latest; bash deploy.sh; fi"
