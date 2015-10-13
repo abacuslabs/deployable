@@ -28,14 +28,14 @@ ssh -o StrictHostKeyChecking=no "$HOST" "mkdir $BUILD_ID; tar -C $BUILD_ID -xf $
 
 ### Deploy
 
-PROFILED_LINE="for script in \$HOME/.profile.d/*; do if [ -r "\\\$script" ]; then . "\\\$script"; fi done"
+PROFILED_LINE="for script in \\\$HOME/.profile.d/*; do if [ -r "\\\$script" ]; then . "\\\$script"; fi done"
 
 ssh -o StrictHostKeyChecking=no "$HOST" /bin/bash << EOF
 
   ln -sfn "$BUILD_ID" latest
   ln -sfn latest/.heroku .
   ln -sfn latest/.profile.d .
-  grep -q "$PROFILED_LINE" ".bashrc" || echo "$PROFILED_LINE" >> ".bashrc"
+  grep -q "$PROFILED_LINE" ".profile" || echo "$PROFILED_LINE" >> ".profile"
 
 EOF
 
