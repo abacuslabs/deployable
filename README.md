@@ -30,6 +30,8 @@ for possible options.
 * Then, make sure you have [Nodejs](https://nodejs.org/en/) installed on your machine. Afterwards,
 you can run `npm install` which install all dependencies and build the application.
 
+* Run [deploy.sh](deploy.sh) to start Deployable. It will run on port 3000 by default. You can also run this script in a `@reboot` cronjob or when you `git pull`.
+
 ## License
 
 MIT
