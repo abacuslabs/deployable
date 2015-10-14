@@ -15,7 +15,6 @@
     "body-parser": "~1.13.2",
     "cookie-parser": "~1.3.5",
     "debug": "~2.2.0",
-    "dotenv": "^1.2.0",
     "express": "~4.13.1",
     "express-session": "^1.11.3",
     "github": "^0.2.4",
@@ -26,7 +25,8 @@
     "nedb": "^1.2.1",
     "node-uuid": "^1.4.3",
     "passport": "^0.3.0",
-    "passport-github": "^1.0.0"
+    "passport-github": "^1.0.0",
+    "pm2": "^0.15.7"
   },
   "devDependencies": {
     "bower": "^1.5.3",

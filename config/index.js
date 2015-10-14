@@ -1,12 +1,5 @@
 var _ = require('lodash');
-var dotenv = require('dotenv');
-var path = require('path')
-
-// run in silent mode
-dotenv.config({silent:true})
-
-// load dotenv config vars if available
-dotenv.load();
+var path = require('path');
 
 var config = {
   URL: "http://127.0.0.1",
@@ -16,6 +9,5 @@ var config = {
   SCRIPTS_DIR: path.join(__dirname, '../scripts/'),
   BUILD_DIR: path.join(__dirname, '../.tmp/')
 };
-config = _.defaults(process.env, config);
 
-module.exports = config;
+module.exports = _.defaults(require('./config'), config);

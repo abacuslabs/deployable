@@ -13,17 +13,21 @@ Deployable has a couple of opinions about deploys:
 
 ## Setup
 
-* You'll need to create a [GitHub application key](https://github.com/settings/developers). Once you have this, you will then need to create a `.env` file on the root directory of the project.
-See [.env.example](.env.example).
+* You'll need to create a [GitHub application key](https://github.com/settings/developers).
+Once you have this, you will then need to create a `config/config.json` file on the root
+directory of the project. See [config/config.json](config/config.json).
 
-* You'll need to create an SSH key with `ssh-keygen` for the user that is running Deployable. The public key will need to be added to `.ssh/authorized_keys` on each application server.
+* You'll need to create an SSH key with `ssh-keygen` for the user that is running Deployable.
+The public key will need to be added to `.ssh/authorized_keys` on each application server.
 
-* Deployable looks for `deploy.sh` in your repository and uses it to restart your proccesses. It is good for this script to handle all states (stopped, running, etc).
+* Deployable looks for `deploy.sh` in your repository and uses it to restart your proccesses.
+It is good for this script to handle all states (stopped, running, etc).
 
 * Afterwards, you'll need to setup your repositories and deployment environments in
-`config/repos.json`. See [config/repos.json.example](config/repos.json.example) for possible options.
+`config/repos.json`. See [config/repos.json.example](config/repos.json.example)
+for possible options.
 
-* Then, make sure you have [Node.js](https://nodejs.org/en/) installed on your machine. Afterwards,
+* Then, make sure you have [Nodejs](https://nodejs.org/en/) installed on your machine. Afterwards,
 you can run `npm install` which install all dependencies and build the application.
 
 ## License

@@ -1,4 +1,3 @@
 #!/bin/bash
-npm install
-pm2 start pm2.json
-pm2 save
+node_modules/.bin/pm2 kill
+node_modules/.bin/pm2 start pm2.json

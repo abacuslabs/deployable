@@ -23,3 +23,4 @@ npm-debug.log
 .env
 public/build
 config/repos.json
+config/config.json
