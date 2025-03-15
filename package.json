@@ -26,7 +26,7 @@
     "node-uuid": "^1.4.3",
     "passport": "^0.3.0",
     "passport-github": "^1.0.0",
-    "pm2": "^0.15.7"
+    "pm2": "^6.0.5"
   },
   "devDependencies": {
     "bower": "^1.5.3",
